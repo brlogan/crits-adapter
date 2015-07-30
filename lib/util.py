@@ -219,9 +219,13 @@ class Daemon:
         self.stop()
         self.start()
 
-    def get_poll_interval(self, c_site):
-        poll_interval = \
-            self.config['crits']['sites'][c_site]['api']['poll_interval']
+    def get_poll_interval(self, tool, site):
+        if tool == 'crits':
+            poll_interval = \
+                self.config[tool]['sites'][site]['api']['poll_interval']
+        elif tool == 'edge':
+            poll_interval = \
+                self.config[tool]['sites'][site]['taxii']['poll_interval']            
         return(poll_interval)
 
     def run(self):
@@ -244,7 +248,7 @@ class Daemon:
                                                      dest=e_site,
                                                      direction='c2e')
                     last_run = last_run.replace(tzinfo=pytz.utc)
-                    poll_interval = self.get_poll_interval(c_site)
+                    poll_interval = self.get_poll_interval('crits', c_site)
                     if now >= \
                        last_run + datetime.timedelta(seconds=poll_interval):
                         self.logger.info('initiating crits=>edge sync between '
@@ -266,7 +270,7 @@ class Daemon:
                                                      dest=c_site,
                                                      direction='e2c')
                     last_run = last_run.replace(tzinfo=pytz.utc)
-                    poll_interval = self.get_poll_interval(e_site)
+                    poll_interval = self.get_poll_interval('edge', e_site)
                     if now >= \
                        last_run + datetime.timedelta(seconds=poll_interval):
                         self.logger.info('initiating edge=>crits sync between '
